@@ -93,11 +93,25 @@ package operations;
         IMMED_TYPE_J,
     } immediate_type_t;
 
+    // Registers can store content from the ALU, main memory and the Branch Unit (on JAL/JALR)
+    typedef enum logic [1:0] {
+        REG_WRITE_SRC_ALU,
+        REG_WRITE_SRC_MEM,
+        REG_WRITE_SRC_BRANCH
+    } reg_write_src_t;
+
     // Branches are resolved after the ALU phase, some of the control unit logic has to be offloaded to the Branch Unit
     // Knowing the type of branch is important
-    typedef enum logic [1:0] {
-        BRANCH_TYPE_NONE,           // The instruction is not a branch, do pc + 4.
-        BRANCH_TYPE_NORMAL,         // Normal, as in just a branch
+    typedef enum logic [3:0] {
+        BRANCH_TYPE_NONE,           // The instruction is not a branch, increment PC normally
+        BRANCH_TYPE_BEQ,
+        BRANCH_TYPE_BNE,
+        BRANCH_TYPE_BLT,
+        BRANCH_TYPE_BGE,
+        BRANCH_TYPE_BLTU,
+        BRANCH_TYPE_BGEU,
+        BRANCH_TYPE_JAL,
+        BRANCH_TYPE_JALR,
         BRANCH_TYPE_AUIPC
     } branch_type_t;
 
@@ -203,7 +217,7 @@ package operations;
                 endcase
             end
 
-            OPCODE_WIDTH'1110011: begin
+            OPCODE_WIDTH'b1110011: begin
                 // The LSB of func12 determines the type.
                 if (op_bits[20] == 0)   return OP_ECALL;
                 else                    return OP_EBREAK;
@@ -324,17 +338,21 @@ package operations;
             OP_SW:
                 return ALU_OP_ADD;          // The immediate gets added to the offset
 
-            // Conditional and unconditional jumps
+            // Unconditional jumps
             OP_JAL:
             OP_JALR:
+            OP_AUIPC:
+                return ALU_OP_ADD;
+
+            // Conditional jumps
             OP_BEQ:
             OP_BNE:
             OP_BLT:
             OP_BGE:
             OP_BLTU:
             OP_BGEU:
-            OP_AUIPC:
-                return ALU_OP_ADD;
+                // On conditional jumps, the ALU performs half of the comparison hrough substracting both registers
+                return ALU_OP_SUB;
 
             // Operations that are not currently implemented / do not require the ALU at all
             OP_FENCE:
