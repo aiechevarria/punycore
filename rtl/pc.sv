@@ -8,7 +8,7 @@
 
 import general_config::*;
 
-module register_file (
+module pc (
     input   logic                                               clk,
     input   logic       [general_config::ADDR_WIDTH - 1:0]      pc_in,
     output  logic       [general_config::ADDR_WIDTH - 1:0]      pc_out
