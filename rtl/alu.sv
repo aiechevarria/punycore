@@ -15,14 +15,14 @@ module alu (
     input   logic       [general_config::DATA_WIDTH - 1:0]          b,              // Operand B
     output  logic       [general_config::DATA_WIDTH - 1:0]          res,            // Result
     output  logic                                                   carry,          // For unsigned values, if there is a carry bit (on addition, overflow) 
-    output  logic                                                   signed_ovf,     // For signed values, if both operands have the same sign and the result does not (also overflow)
+    output  logic                                                   signed_ovf      // For signed values, if both operands have the same sign and the result does not (also overflow)
 );
 
 always_comb begin
     // Add an extra bit for arithmetic operations
-    logic [general_config::DATA_WIDTH:0] ext_res;
-    carry = false;
-    signed_ovf = false;
+    logic [general_config::DATA_WIDTH:0] ext_res = 33'b0;
+    carry = 0;
+    signed_ovf = 0;
 
      // Assign the result depending on the operation
     case (control)
@@ -46,7 +46,7 @@ always_comb begin
         ALU_OP_SUB: begin
             // Again subtraction with additional bits cannot be done in an straightforward way because ambiguity in signedness.
             // Instead we perform an addition as before, but changing the sign on the second operand by performing two's complement. 
-            ext_res = {1'b0, a} + {1'b0, ~b} + (general_config::DATA_WIDTH + 1)'d1;     // DATA_WIDTH + 1'd1 means add 1 on the lsb (with 32 trailing 0s) 
+            ext_res = {1'b0, a} + {1'b0, ~b} + 33'd1;       // Add 1 on the lsb (with 32 trailing 0s) 
             res = ext_res[general_config::DATA_WIDTH - 1:0];
 
             carry = ext_res[general_config::DATA_WIDTH];
