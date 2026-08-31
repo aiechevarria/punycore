@@ -8,15 +8,16 @@
 
 import operations::*;
 
-module control_unit (
-    input   logic [DATA_WIDTH - 1:0]    insn;           // The entire instruction
-    input   immediate_type_t            immed_type;     // Type of the immediate
-    output  logic [DATA_WIDTH - 1:0]    result;         // The extended immediate
+module immediate_extender (
+    input   logic [DATA_WIDTH - 1:0]    insn,           // The entire instruction
+    input   immediate_type_t            immed_type,     // Type of the immediate
+    output  logic [DATA_WIDTH - 1:0]    result          // The extended immediate
 );
 
 always_comb begin
     logic                       sign = insn[31];    // The sign bit is always present on the last 32nd bit of the insn. This simplifies sing extension
     logic [DATA_WIDTH - 1:0]    extracted;          // The immediate that has been extracted from the instruction
+    result = 32'b0;
 
     // Check docs/encoding/0immediate_reconstruction.png
     unique case (immed_type)

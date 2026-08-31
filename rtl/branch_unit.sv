@@ -10,24 +10,24 @@ import operations::*;
 import general_config::*;
 
 module branch_unit (
-    input   branch_type_t               branch_type;
-    input   logic                       alu_carry;
-    input   logic                       alu_signed_ovf;
-    input   logic [DATA_WIDTH - 1:0]    alu_output;
-    input   logic [DATA_WIDTH - 1:0]    immediate;
-    input   logic [ADDR_WIDTH - 1:0]    curr_pc;
-    output  logic [ADDR_WIDTH - 1:0]    next_pc;
-    output  logic [DATA_WIDTH - 1:0]    reg_wb;             // This is here exclusively for JAL / JALR, since it requires storing PC + 4 to a GP register
+    input   branch_type_t               branch_type,
+    input   logic                       alu_carry,
+    input   logic                       alu_signed_ovf,
+    input   logic [DATA_WIDTH - 1:0]    alu_output,
+    input   logic [DATA_WIDTH - 1:0]    immediate,
+    input   logic [ADDR_WIDTH - 1:0]    curr_pc,
+    output  logic [ADDR_WIDTH - 1:0]    next_pc,
+    output  logic [DATA_WIDTH - 1:0]    reg_wb              // This is here exclusively for JAL / JALR, since it requires storing PC + 4 to a GP register
 );
 
 always_comb begin
     logic                       is_negative         = alu_output[31] ^ alu_signed_ovf;  // If the nubmer is negative or the sign overflow is active, the comparison is less 
-    logic [ADDR_WIDTH - 1:0]    offset;
+    logic [ADDR_WIDTH - 1:0]    offset              = 32'b0;
     
     unique case (branch_type)
         BRANCH_TYPE_NONE:           offset = (ADDR_WIDTH / 8);                                      // When no branching happens, increment the PC to the next instruction
-        BRANCH_TYPE_BEQ:            if (alu_output == DATA_WIDTH'b0)    offset = immediate;
-        BRANCH_TYPE_BNE:            if (alu_output != DATA_WIDTH'b0)    offset = immediate;
+        BRANCH_TYPE_BEQ:            if (alu_output == 32'b0)            offset = immediate;
+        BRANCH_TYPE_BNE:            if (alu_output != 32'b0)            offset = immediate;
         BRANCH_TYPE_BLT:            if (is_negative)                    offset = immediate;
         BRANCH_TYPE_BGE:            if (~is_negative)                   offset = immediate;
         BRANCH_TYPE_BLTU:           if (~alu_carry)                     offset = immediate;         // If the ALU has no carry, the second operand is smaller

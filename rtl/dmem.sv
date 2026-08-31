@@ -16,6 +16,8 @@ module dmem (
     output  logic       [general_config::DATA_WIDTH - 1:0]      data_out
 );
 
+// TODO implement byte and half load operations !!! 
+// Get some feedback from the Control unit and sign extend here
 logic [DATA_WIDTH - 1:0] dmem [0:9] = '{
     32'h00A0_0093,  // addi x1,  x0, 10
     32'h0140_0113,  // addi x2,  x0, 20
@@ -29,10 +31,10 @@ logic [DATA_WIDTH - 1:0] dmem [0:9] = '{
     32'h0020_A533   // slt  x10, x1, x2
 };
 
-always_ff @(posedge clk) begin
-    logic index = alu_in / (DATA_WIDTH / 8);    // Position in the dmem arr.
+logic [DATA_WIDTH - 1:0] index = alu_in / (DATA_WIDTH / 8);    // Position in the dmem arr.
 
-    data_out = '0;                              // Default output
+always_ff @(posedge clk) begin
+    data_out <= 32'b0;                      // Default output
 
     // Only read if we == 0
     if (we == 0)    data_out    <= dmem[index];

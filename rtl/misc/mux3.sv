@@ -14,7 +14,7 @@ module mux3 (
 );
 
 always_comb begin
-    case (ctr)
+    case (ctrl)
         2'b00:              out = in0;
         2'b01:              out = in1;
         2'b10:              out = in2;

@@ -12,5 +12,5 @@ module mux2 (
     input logic                                     ctrl,
     output logic [general_config::DATA_WIDTH - 1:0] out
 );
-    assign out = s ? in0 : in1;
+    assign out = ctrl ? in0 : in1;
 endmodule
